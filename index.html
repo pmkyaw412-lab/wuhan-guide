@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Places to go and food to try in Wuhan and Changsha, with photos and tap-to-show Chinese names.">
+<meta property="og:title" content="Wuhan in Four Days">
+<meta property="og:description" content="Places to go and food to try in Wuhan and Changsha.">
+<meta property="og:image" content="img/yct.jpg">
+<style>*,*::before,*::after{box-sizing:border-box}:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Wuhan in Four Days</title>
+</head>
+<body>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@600;900&display=swap">
+<style>
+/* Layout: river-map hero split, then a photo menu of places grouped by river bank, then a photo menu of dishes. Chinese names are tappable "show cards". */
+:root{
+  --paper:#eef2ef; --surface:#f8faf9; --ink:#132320; --muted:#4b5e59; --line:#c8d4cf;
+  --river:#2b6b66; --river-tint:#bcd6d0; --tile:#e3a90f; --tile-tint:#f6e3a8; --on-tile:#1d1a0c;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --zh:"Noto Serif SC","Songti SC","SimSun","Noto Serif CJK SC",serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0e1817; --surface:#142321; --ink:#e4ece9; --muted:#9db1ab; --line:#26393a;
+  --river:#6cb9ae; --river-tint:#1b3836; --tile:#f0bb2c; --tile-tint:#3a3114; --on-tile:#1d1a0c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1817; --surface:#142321; --ink:#e4ece9; --muted:#9db1ab; --line:#26393a;
+  --river:#6cb9ae; --river-tint:#1b3836; --tile:#f0bb2c; --tile-tint:#3a3114; --on-tile:#1d1a0c; color-scheme:dark}
+
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:0 48px}
+::selection{background:var(--tile);color:var(--on-tile)}
+a{color:var(--river);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--tile);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin-inline:auto}
+h1,h2,h3,h4{font-family:var(--display);text-wrap:balance;margin:0}
+h2{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:850;font-stretch:112%;letter-spacing:-.01em;line-height:1.05}
+p{margin:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.85em}
+section{padding-block:64px 0}
+.lede{color:var(--muted);max-width:62ch;margin-top:10px}
+
+/* Hero */
+.hero{display:grid;gap:28px;align-items:center;padding-block:40px 8px}
+@media (min-width:880px){.hero{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;padding-block:64px 8px}}
+.hero h1{font-size:clamp(2.6rem,7.5vw,4.9rem);font-weight:900;font-stretch:118%;line-height:.95;letter-spacing:-.02em}
+.hero h1 span{display:block;color:var(--river)}
+.hero .sub{font-size:1.15rem;color:var(--muted);max-width:34ch;margin-top:18px}
+.hero .jump{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;font:600 .95rem var(--body);padding:11px 18px;border-radius:999px;border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);text-decoration:none;cursor:pointer;transition:transform .15s ease}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:active{transform:translateY(1px) scale(.98)}
+.map{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px;min-width:0;margin:0}
+.map svg{display:block;width:100%;height:auto}
+.map figcaption{font-size:.8rem;color:var(--muted);padding:6px 8px 2px}
+.m-river{fill:none;stroke:var(--river-tint);stroke-linecap:round;stroke-linejoin:round}
+.m-lake{fill:var(--river-tint)}
+.m-dist{font-family:var(--display);font-weight:800;font-stretch:125%;font-size:15px;letter-spacing:.14em;fill:var(--muted);opacity:.55}
+.m-water{font:italic 11px var(--body);fill:var(--river)}
+.m-bridge{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.m-ferry{stroke:var(--river);stroke-width:1.6;stroke-dasharray:3 3;fill:none}
+.pin{cursor:pointer}
+.pin circle{fill:var(--tile);stroke:var(--ink);stroke-width:1.4;transition:r .15s ease}
+.pin text{font:500 11px var(--body);fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3.5px;stroke-linejoin:round}
+.pin:hover circle,.pin:focus-visible circle{r:7}
+.pin:focus-visible{outline:none}
+.pin.host circle{fill:var(--river)}
+
+/* Before you land */
+.facts{display:grid;gap:0 40px;margin-top:22px}
+@media (min-width:720px){.facts{grid-template-columns:1fr 1fr}}
+.fact{border-top:1px solid var(--line);padding-block:16px;display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:12px}
+.fact h3{font-size:1rem}
+.fact p{color:var(--muted);font-size:.97rem}
+.fact p strong{color:var(--ink);font-weight:600}
+
+/* Place + dish grids */
+.bank{margin-top:40px}
+.bank-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.bank-head h3{font-size:clamp(1.4rem,3vw,1.8rem);font-weight:900;font-stretch:120%;letter-spacing:.01em}
+.bank-head .zhname{font-family:var(--zh);font-weight:900;font-size:1.4rem;color:var(--river)}
+.bank-head p{color:var(--muted);flex-basis:100%;max-width:62ch}
+.grid{display:grid;gap:32px 28px;margin-top:22px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+@media (min-width:1000px){.grid{grid-template-columns:repeat(var(--n,4),minmax(0,1fr))}}
+.card{min-width:0;display:flex;flex-direction:column;gap:10px;border-radius:var(--r);transition:background .4s ease;scroll-margin-top:24px}
+.card.flash{background:var(--tile-tint);box-shadow:0 0 0 10px var(--tile-tint)}
+.ph{position:relative;margin:0;border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;background:var(--river-tint);max-width:100%}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+.card:hover .ph img{transform:scale(1.03)}
+.ph .fallback{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--zh);font-weight:900;font-size:2.4rem;color:var(--river);text-align:center;padding:12px}
+.ph .fallback{display:none}
+.ph.noimg img{display:none}
+.ph.noimg .fallback{display:grid}
+.ph-cap{font-size:.78rem;color:var(--muted);margin-top:-4px}
+.card h4{font-size:1.2rem;font-weight:750;font-stretch:106%;line-height:1.2;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.pick{font:600 .72rem var(--body);background:var(--tile);color:var(--on-tile);border-radius:999px;padding:2px 9px;letter-spacing:.02em;white-space:nowrap}
+.zhrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+.card .why{font-size:.98rem}
+.card .tip{font-size:.9rem;color:var(--muted)}
+.card .tip b{color:var(--ink);font-weight:600}
+
+/* tappable chinese */
+.zh{font-family:var(--zh);font-weight:600;font-size:1.05rem;background:transparent;border:0;border-bottom:1.5px dashed var(--river);color:var(--ink);padding:0 1px;cursor:pointer;line-height:1.3}
+.zh:hover{color:var(--river)}
+.py{font-size:.85rem;color:var(--muted);font-style:italic}
+
+/* Food extras */
+.also{margin-top:30px;display:grid;gap:0 32px}
+@media (min-width:760px){.also{grid-template-columns:1fr 1fr}}
+.also > h4{grid-column:1/-1;font-size:1.05rem;margin-bottom:6px}
+.also-item{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;padding-block:12px;border-top:1px solid var(--line);align-items:baseline}
+.also-item .zh{font-size:1.25rem;font-weight:900}
+.also-item p{font-size:.94rem;color:var(--muted)}
+.also-item p b{color:var(--ink);font-weight:600}
+.aside{margin-top:22px;color:var(--muted);max-width:62ch;font-size:.95rem}
+.shops{display:grid;gap:0 32px;margin-top:14px}
+@media (min-width:600px){.shops{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:960px){.shops{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.shop{display:flex;gap:12px;align-items:baseline;padding-block:10px;border-bottom:1px solid var(--line)}
+.shop span{color:var(--muted);font-size:.92rem}
+.oldnames{margin-top:40px}
+.oldnames h3{font-size:1.3rem;font-weight:800;font-stretch:112%}
+.oldnames > p{color:var(--muted);margin-top:6px;max-width:62ch}
+
+/* Move */
+.moves{display:grid;gap:22px;margin-top:22px}
+@media (min-width:820px){.moves{grid-template-columns:1.2fr 1fr 1fr}}
+.move h3{font-size:1.05rem}
+.move p{color:var(--muted);margin-top:6px;font-size:.97rem}
+.move .big{font-family:var(--display);font-weight:900;font-stretch:120%;font-size:2rem;color:var(--river);line-height:1}
+
+footer{margin-top:64px;border-top:1px solid var(--line);padding-top:20px;font-size:.85rem;color:var(--muted)}
+footer h3{font-size:.95rem;margin-top:18px;color:var(--ink)}
+footer ul{margin:8px 0 0;padding-left:18px;display:grid;gap:4px}
+footer .credits{margin-top:8px;max-width:110ch}
+
+/* Show card */
+.showcard{position:fixed;inset:0;z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.showcard[hidden]{display:none}
+.sc{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px color-mix(in srgb,var(--ink) 22%,transparent);width:min(560px,100%);padding:28px 24px 22px;text-align:center;animation:pop .22s cubic-bezier(.16,1,.3,1)}
+.sc .hint{font-size:.8rem;color:var(--muted)}
+.sc .big{font-family:var(--zh);font-weight:900;font-size:clamp(3rem,15vw,5.5rem);line-height:1.1;margin-top:12px;word-break:keep-all;overflow-wrap:anywhere}
+.sc .p{font-style:italic;color:var(--muted);margin-top:8px;font-size:1.05rem}
+.sc .e{margin-top:2px;font-weight:600}
+.sc .ask{font-family:var(--zh);font-weight:600;font-size:1.5rem;margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.sc .askEn{font-size:.85rem;color:var(--muted)}
+.sc .btn{margin-top:20px}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sc{animation:none}.card,.btn,.ph img{transition:none}.card:hover .ph img{transform:none}}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <h1>Wuhan <span>in four days</span></h1>
+      <p class="sub">The places worth your time and the food worth queuing for, sorted by river bank. Pick what you like.</p>
+      <div class="jump">
+        <a class="btn" href="#places">Places to go</a>
+        <a class="btn ghost" href="#eat">What to eat</a>
+        <a class="btn ghost" href="#beyond">Changsha and more</a>
+      </div>
+    </div>
+    <figure class="map">
+      <svg viewBox="0 0 400 320" role="img" aria-labelledby="mapt">
+        <title id="mapt">Schematic map of Wuhan: Hankou north of the Han River, Hanyang south of it, Wuchang across the Yangtze</title>
+        <path class="m-lake" d="M322 192 C340 180 372 178 390 196 C402 214 396 240 384 256 C368 276 342 280 330 266 C318 250 330 236 324 222 C318 210 314 200 322 192Z"/>
+        <ellipse class="m-lake" cx="264" cy="244" rx="15" ry="9"/>
+        <path class="m-river" stroke-width="24" d="M118 340 C150 280 172 240 190 196 C206 158 226 112 258 72 C286 38 320 12 360 -10"/>
+        <path class="m-river" stroke-width="10" d="M-10 112 C40 118 88 140 122 152 C150 162 170 168 188 182"/>
+        <text class="m-dist" x="40" y="62">HANKOU</text>
+        <text class="m-dist" x="22" y="282">HANYANG</text>
+        <text class="m-dist" x="262" y="122">WUCHANG</text>
+        <text class="m-water" x="300" y="46">Yangtze 长江</text>
+        <text class="m-water" x="16" y="104">Han 汉江</text>
+        <g class="pin" tabindex="0" role="link" data-key="lake" aria-label="East Lake"><text x="350" y="234" text-anchor="middle" style="font-style:italic;fill:var(--river)">East Lake</text></g>
+        <line class="m-bridge" x1="166" y1="212" x2="214" y2="200"/>
+        <g class="pin" tabindex="0" role="link" data-key="bridge" aria-label="Wuhan Yangtze River Bridge"><text x="192" y="232" text-anchor="middle" style="font-size:10px">1957 bridge</text></g>
+        <path class="m-ferry" d="M191 144 L216 162"/>
+        <g class="pin" tabindex="0" role="link" data-key="ferry" aria-label="Yangtze ferry"><text x="222" y="160" style="font-style:italic;fill:var(--river)">ferry</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="lihuangpi" aria-label="Li Huangpi Road"><circle cx="204" cy="90" r="5"/><text x="197" y="86" text-anchor="end">Li Huangpi Rd</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="jiqing" aria-label="Jiqing Street"><circle cx="180" cy="108" r="5"/><text x="172" y="112" text-anchor="end">Jiqing St</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="jianghanrd" aria-label="Jianghan Road"><circle cx="166" cy="127" r="5"/><text x="158" y="131" text-anchor="end">Jianghan Rd</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="customs" aria-label="Customs House"><circle cx="190" cy="144" r="5"/><text x="182" y="152" text-anchor="end">Customs House</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="guqin" aria-label="Guqin Terrace"><circle cx="140" cy="176" r="5"/><text x="132" y="180" text-anchor="end">Guqin Terrace</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="guiyuan" aria-label="Guiyuan Temple"><circle cx="118" cy="200" r="5"/><text x="110" y="204" text-anchor="end">Guiyuan Temple</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="guishan" aria-label="Guishan and Qingchuan Pavilion"><circle cx="160" cy="212" r="5"/><text x="152" y="224" text-anchor="end">Guishan</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="tanhualin" aria-label="Tanhualin"><circle cx="240" cy="180" r="5"/><text x="248" y="184">Tanhualin</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="yct" aria-label="Yellow Crane Tower"><circle cx="218" cy="204" r="5"/><text x="226" y="207">Yellow Crane Tower</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="hubu" aria-label="Hubu Alley"><circle cx="226" cy="222" r="5"/><text x="234" y="226">Hubu Alley</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="museum" aria-label="Hubei Provincial Museum"><circle cx="320" cy="184" r="5"/><text x="320" y="172" text-anchor="middle">Hubei Museum</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="hanjie" aria-label="Chu River Han Street"><circle cx="284" cy="238" r="5"/><text x="284" y="258" text-anchor="middle">Han Street</text></g>
+        <g class="pin" tabindex="0" role="link" data-key="whu" aria-label="Wuhan University"><circle cx="322" cy="270" r="5"/><text x="314" y="285" text-anchor="end">Wuhan Univ.</text></g>
+        <g class="pin host" tabindex="0" role="link" data-key="whu" aria-label="Wuhan University of Technology, host campus"><circle cx="346" cy="294" r="5"/><text x="356" y="298">WUT</text></g>
+      </svg>
+      <figcaption>Schematic, not to scale. Tap a place to jump to it.</figcaption>
+    </figure>
+  </header>
+
+  <section id="prep" aria-labelledby="prep-h">
+    <h2 id="prep-h">Before you land</h2>
+    <div class="facts">
+      <div class="fact"><h3>Weather</h3><p><strong>About 17°C by day, 8°C at night</strong>, with rain on roughly three days in ten. Bring a warm layer and a small umbrella; many restaurants and old buildings are barely heated.</p></div>
+      <div class="fact"><h3>Book ahead</h3><p><strong>Hubei Provincial Museum</strong> is free but needs a real-name slot booked on its official WeChat account, and you enter with the passport you booked with. Closed Mondays. <strong>Jianghan Customs House Museum</strong> is also free; book on WeChat.</p></div>
+      <div class="fact"><h3>Pay</h3><p>Link your card to <strong>Alipay</strong> and <strong>WeChat Pay</strong> before you fly. Street stalls rarely take anything else, and Alipay's metro QR gets you through the gates.</p></div>
+      <div class="fact"><h3>Apps</h3><p><strong>Amap</strong> (高德地图) for directions, <strong>Didi</strong> for cars, <strong>Trip.com</strong> for trains and tickets.</p></div>
+      <div class="fact"><h3>Show cards</h3><p>Tap any underlined Chinese name on this page and it opens full screen, with a ready-made line to show a driver or a cook.</p></div>
+      <div class="fact"><h3>Top picks</h3><p>Short on time? Go for the places and dishes marked <strong>Top pick</strong> first.</p></div>
+    </div>
+  </section>
+
+  <section id="places" aria-labelledby="places-h">
+    <h2 id="places-h">Places to go</h2>
+    <p class="lede">Grouped by river bank, so you can pair places that sit close together. Wuchang has the most, and it is also where WUT is.</p>
+    <div id="banks"></div>
+  </section>
+
+  <section id="eat" aria-labelledby="eat-h">
+    <h2 id="eat-h">What to eat</h2>
+    <p class="lede">Hubei food leans on what the rivers and lakes give: lotus root, freshwater fish, rice, and a lot of sesame paste. Tap a dish name to show it at the counter.</p>
+    <div id="meals"></div>
+    <div class="also" id="also"></div>
+    <div class="oldnames">
+      <h3>The old names</h3>
+      <p>These shops are behind Wuhan's classic snacks. Most have several branches; search the name on Amap and go to the nearest one.</p>
+      <div class="shops" id="shops"></div>
+    </div>
+    <p class="aside">Crayfish (小龙虾) is Wuhan's summer obsession and runs May to September. In November, fill up on lotus root soup instead.</p>
+  </section>
+
+  <section id="beyond" aria-labelledby="beyond-h">
+    <h2 id="beyond-h">Beyond Wuhan</h2>
+    <p class="lede">The must-sees for your day or two in Changsha, and dishes worth trying anywhere on the trip.</p>
+    <div id="beyondGroups"></div>
+  </section>
+
+  <section id="move" aria-labelledby="move-h">
+    <h2 id="move-h">Getting around</h2>
+    <div class="moves">
+      <div class="move"><div class="big">¥2-7</div><h3>Metro</h3><p>The fastest way between banks. Line 2 links Hankou with Jiedaokou by Wuhan University; Line 4 stops at the Yellow Crane Tower. Pay with Alipay's metro QR. Runs roughly 6:00 to 23:00.</p></div>
+      <div class="move"><div class="big">¥1.5</div><h3>Yangtze ferry</h3><p>Commuter boats between Wuhanguan (Hankou) and Zhonghua Road (Wuchang), about every 20 to 30 minutes, 6:30 to 20:00.</p></div>
+      <div class="move"><div class="big">¥25-50</div><h3>Didi</h3><p>Typical fare across the river between Wuchang and Hankou. After 23:00 it is the only easy way back.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Prices and hours were checked in October 2026 and change often. Confirm on the day, especially for tickets and bookings.</p>
+    <h3>Sources</h3>
+    <ul>
+      <li><a href="https://mychina.guide/blog/wuhan-travel-guide-stay-eat-punk-metal-bars-2026" target="_blank" rel="noopener">MyChinaGuide: Wuhan Travel Guide 2026</a></li>
+      <li><a href="https://www.hbww.org.cn/p/12728.html" target="_blank" rel="noopener">Hubei Provincial Museum: visitor reservation</a></li>
+      <li><a href="https://www.dahepiao.com/lvyounews1/20250424510882.html" target="_blank" rel="noopener">Yellow Crane Tower day and night tickets</a></li>
+      <li><a href="https://www.globaltimes.cn/page/202605/1360978.shtml" target="_blank" rel="noopener">Global Times: Wuhan University drops reservation rule</a></li>
+      <li><a href="https://www.maigoo.com/goomai/200069.html" target="_blank" rel="noopener">Maigoo: Wuhan's eight famous snacks</a></li>
+      <li><a href="https://www.holiday-weather.com/wuhan/averages/november/" target="_blank" rel="noopener">Holiday Weather: Wuhan in November</a></li>
+    </ul>
+    <h3>Photo credits</h3>
+    <p class="credits" id="credits"></p>
+  </footer>
+</div>
+
+<div class="showcard" id="showcard" role="dialog" aria-modal="true" aria-labelledby="scBig" hidden>
+  <div class="sc">
+    <p class="hint">Show this screen</p>
+    <p class="big" id="scBig" lang="zh-CN"></p>
+    <p class="p" id="scPy"></p>
+    <p class="e" id="scEn"></p>
+    <p class="ask" id="scAsk" lang="zh-CN"></p>
+    <p class="askEn" id="scAskEn"></p>
+    <button class="btn" id="scClose" type="button">Close</button>
+  </div>
+</div>
+
+<script>
+const BANKS=[
+ {name:"Wuchang",zh:"武昌",about:"The south bank: Snake Hill with the tower and the breakfast alley, then the museum, the universities and East Lake further east.",places:[
+  {k:"yct",lead:1,top:1,en:"Yellow Crane Tower",zh:"黄鹤楼",py:"Huánghè Lóu",why:"Wuhan's symbol, high on Snake Hill above the Yangtze. The tower is a 1985 rebuild of a site Tang poets wrote about; climb it for the view over the river and all three towns.",tip:"<b>Day ticket about ¥70.</b> After dark the park reopens with light shows on the tower (夜上黄鹤楼, about ¥120, 19:30 to 22:00). Day and night tickets are separate."},
+  {k:"hubu",top:1,en:"Hubu Alley",zh:"户部巷",py:"Hùbù Xiàng",why:"A lane of breakfast stalls right below the tower. Touristy, but the easiest way to try every Wuhan breakfast classic in one walk.",tip:"<b>Go before 9 am.</b> For a more local version, walk ten minutes to Liangdao Street (粮道街)."},
+  {k:"bridge",top:1,en:"Wuhan Yangtze River Bridge",zh:"武汉长江大桥",py:"Wǔhàn Chángjiāng Dàqiáo",why:"The first bridge across the Yangtze, opened in 1957: a double-deck steel truss with road above and rail below. Walk across on the side paths in about 20 minutes while trains rumble underneath.",tip:"<b>Free.</b> Stairs up from near the Yellow Crane Tower."},
+  {k:"museum",top:1,en:"Hubei Provincial Museum",zh:"湖北省博物馆",py:"Húběi Shěng Bówùguǎn",why:"Home to the 2,400-year-old chime bells of Marquis Yi of Zeng, a set of 65 bronze bells, and the still-sharp Sword of Goujian.",tip:"<b>Free, booking needed.</b> Reserve on the museum's WeChat account and bring the same passport. Closed Mondays."},
+  {k:"tanhualin",en:"Tanhualin",zh:"昙华林",py:"Tánhuá Lín",why:"Old Wuchang lanes with early 1900s schools and churches, now full of small cafés, studios and bookshops.",tip:"<b>Free.</b> Best for a slow afternoon near the tower."},
+  {k:"whu",en:"Wuhan University",zh:"武汉大学",py:"Wǔhàn Dàxué",why:"Green-tiled 1930s buildings stepping up Luojia Hill, often called China's most beautiful campus. Quiet in autumn.",tip:"<b>No booking since May 2026.</b> Bring your passport. A short ride from WUT."},
+  {k:"lake",en:"East Lake Greenway",zh:"东湖绿道",py:"Dōnghú Lǜdào",why:"Walking and cycling paths around China's largest city lake. Rent a bike at any entrance and ride a stretch.",tip:"<b>Full loop 3 to 4 hours.</b> Tingtao (听涛) is free; Luoyan Island (落雁岛) is the quiet sunset spot."},
+  {k:"hanjie",en:"Chu River Han Street",zh:"楚河汉街",py:"Chǔhé Hànjiē",why:"A rebuilt Republic-era style shopping street between two lakes. Easy for dinner and lit up at night.",tip:""}
+ ]},
+ {name:"Hankou",zh:"汉口",about:"The north bank and the old treaty port: a waterfront customs house, the former concession streets and the city's best evening food street.",places:[
+  {k:"jiqing",lead:1,top:1,en:"Jiqing Street",zh:"吉庆街",py:"Jíqìng Jiē",why:"Wuhan's classic night food street: braised snacks, skewers, beer and late hot dry noodles under the lanterns.",tip:"<b>Go after 7 pm.</b>"},
+  {k:"ferry",top:1,en:"Yangtze ferry at sunset",zh:"武汉关码头",py:"Wǔhànguān Mǎtou",why:"Commuter boats cross between Wuhanguan wharf in Hankou and Zhonghua Road in Wuchang. The river is far wider than it looks from the bank.",tip:"<b>About ¥1.5.</b> Every 20 to 30 minutes, 6:30 to 20:00."},
+  {k:"customs",en:"Jianghan Customs House",zh:"江汉关博物馆",py:"Jiānghàn Guān Bówùguǎn",why:"The clock-towered customs house from the 1920s on the riverfront, now a museum on Hankou's years as a tea-trading port.",tip:"<b>Free;</b> book on WeChat."},
+  {k:"lihuangpi",en:"Li Huangpi Road",zh:"黎黄陂路",py:"Lí Huángpí Lù",why:"A short street in the old Russian concession with 1900s houses and cafés. The photo shows the wedge-shaped Bagong House (巴公房子) at its corner.",tip:"<b>Free.</b> Walk here along the riverside from the Customs House."},
+  {k:"jianghanrd",en:"Jianghan Road",zh:"江汉路步行街",py:"Jiānghàn Lù Bùxíngjiē",why:"About 1.2 km of pedestrian shopping street behind old bank and department-store facades. Look up, not at the shop windows.",tip:"Cai Linji, Lao Tong Cheng and Si Ji Mei are all close by."}
+ ]},
+ {name:"Hanyang",zh:"汉阳",about:"The quiet third town, south of the Han River and across the Yangtze from the tower.",places:[
+  {k:"guishan",en:"Guishan and Qingchuan Pavilion",zh:"晴川阁",py:"Qíngchuān Gé",why:"Turtle Hill faces Snake Hill across the river. The pavilion at its riverside foot gives the best view of the 1957 bridge from below.",tip:""},
+  {k:"guqin",en:"Guqin Terrace",zh:"古琴台",py:"Gǔqín Tái",why:"A small garden built around the legend of Boya and Ziqi, two friends bound by music, and the origin of the Chinese word for a true friend, 知音.",tip:""},
+  {k:"guiyuan",en:"Guiyuan Temple",zh:"归元寺",py:"Guīyuán Sì",why:"A working Buddhist temple known for its hall of 500 arhat statues. Locals count them to tell their fortune.",tip:""}
+ ]}
+];
+
+const MEALS=[
+ {name:"Breakfast",zh:"过早",about:"Wuhan calls breakfast guòzǎo and eats it out on the street, from about 6 to 10 am, standing or on a plastic stool.",items:[
+  {k:"reganmian",lead:1,top:1,en:"Hot dry noodles",zh:"热干面",py:"rè gān miàn",why:"Alkaline noodles tossed with sesame paste, soy, pickled long beans and chili oil. Stir hard before the first bite.",tip:"<b>¥7-22.</b> The famous name is 蔡林记 Cai Linji."},
+  {k:"doupi",top:1,en:"Doupi",zh:"三鲜豆皮",py:"sānxiān dòupí",why:"Sticky rice with diced pork, mushroom and bamboo shoot under a crisp egg-and-bean skin, cut into squares from a giant pan.",tip:"<b>¥8-15.</b> Best at 老通城 Lao Tong Cheng."},
+  {k:"mianwo",en:"Mianwo",zh:"面窝",py:"miànwō",why:"A fried ring of rice-and-soy batter with sesame: thick and soft in the middle, crunchy at the rim.",tip:"<b>About ¥2.</b> Classic at 谢荣德 Xie Rongde."},
+  {k:"hutang",en:"Hutang fen",zh:"糊汤粉",py:"hútāng fěn",why:"Thin rice noodles in a thick, peppery broth of small river fish. Dip a youtiao in it.",tip:"Classic at 田启恒 Tian Qiheng."}
+ ]},
+ {name:"Lunch and dinner",zh:"湖北菜",about:"Sit-down Hubei food: steamed, stewed and gentler on the chili than the Hunan food you will have had the day before.",items:[
+  {k:"lotus",lead:1,top:1,en:"Lotus root and pork rib soup",zh:"排骨藕汤",py:"páigǔ ǒu tāng",why:"The Hubei comfort dish. The local lotus root turns soft and powdery after hours in a clay pot. Perfect for a cold November night.",tip:"<b>¥48-68</b> at most Hubei restaurants."},
+  {k:"fish",top:1,en:"Steamed Wuchang bream",zh:"清蒸武昌鱼",py:"qīngzhēng Wǔchāng yú",why:"A freshwater bream steamed with soy and scallion. The city's best-known fish.",tip:"<b>¥58-120</b> depending on size."},
+  {k:"sanzheng",en:"Mianyang three steamed",zh:"沔阳三蒸",py:"Miǎnyáng sān zhēng",why:"Pork, fish and vegetables, each coated in seasoned rice flour and steamed until tender.",tip:"<b>¥38-68.</b>"},
+  {k:"caitai",en:"Purple choy sum with cured pork",zh:"洪山菜薹炒腊肉",py:"Hóngshān càitái chǎo làròu",cap:"Hongshan caitai, the purple-stemmed greens before cooking.",why:"A winter vegetable from Wuchang's Hongshan, fried with smoky cured pork.",tip:"Ask if it is in yet; the season starts as the weather turns cold."}
+ ]},
+ {name:"Snacks",zh:"小吃",about:"",items:[
+  {k:"huanxi",en:"Sesame rice balls",zh:"欢喜坨",py:"huānxǐ tuó",why:"Fried glutinous rice balls rolled in sesame and filled with sweet bean paste. Crisp outside, chewy inside.",tip:"Sold at breakfast stalls and snack streets."}
+ ]}
+];
+
+const BEYOND=[
+ {name:"Changsha",zh:"长沙",key:"places",kind:"place",about:"Your Hunan stop. Most sights sit along the Xiang River, a few metro stops apart.",places:[
+  {k:"cs-orange",top:1,en:"Orange Isle",zh:"橘子洲",py:"Júzi Zhōu",why:"A long sandbar island in the Xiang River, ending in a giant granite head of the young Mao Zedong looking over the city.",tip:"<b>Free, booking needed</b> on the WeChat account 岳麓山橘子洲旅游区. Open 7:00 to 22:00; metro Line 2 to Juzizhou. The island train is about ¥25 one way."},
+  {k:"cs-museum",top:1,en:"Hunan Museum",zh:"湖南博物院",py:"Húnán Bówùyuàn",why:"Home to the Mawangdui Han tombs: the 2,100-year-old preserved body of Lady Xin Zhui, lacquerware, and a silk gown weighing under 50 grams.",tip:"<b>Free but hard to book.</b> Slots open at 20:00, seven days ahead, on hnmuseum.com or its WeChat mini program, and go in seconds. Bring your passport."},
+  {k:"cs-yueluacad",en:"Yuelu Academy",zh:"岳麓书院",py:"Yuèlù Shūyuàn",why:"One of China's four great classical academies, founded in 976 and still part of Hunan University. Quiet courtyards and old lecture halls.",tip:"<b>About ¥40-50,</b> half price with a student ID. Metro to Hunan Daxue station."},
+  {k:"cs-yuelushan",en:"Yuelu Mountain",zh:"岳麓山",py:"Yuèlù Shān",why:"The wooded hill right behind the academy, with Aiwan Pavilion (爱晚亭) and views back over the river and Orange Isle.",tip:"<b>Free,</b> 6:00 to 22:00. Cable car about ¥30 one way."},
+  {k:"cs-taiping",en:"Taiping Street",zh:"太平街",py:"Tàipíng Jiē",why:"A restored old street of grey-brick shops and snack stalls in the city centre, liveliest after dark.",tip:"<b>Free.</b> Next to Wuyi Square and Pozi Street."},
+  {k:"cs-huogong",en:"Huogongdian",zh:"火宫殿",py:"Huǒgōngdiàn",why:"A historic food hall on Pozi Street serving Changsha snacks from push-carts. The classic place for your first stinky tofu.",tip:"No. 46 Pozi Street. A ¥1 utensil charge per person."},
+  {k:"cs-wenheyou",en:"Super Wenheyou",zh:"超级文和友",py:"Chāojí Wénhéyǒu",why:"A multi-storey food hall rebuilt as a 1980s Changsha neighbourhood. More spectacle than great food, but fun to walk through.",tip:"Open 11:00 to 3:00 at Hisense Plaza. Expect queues."}
+ ]},
+ {name:"Changsha food",zh:"湘菜",key:"items",kind:"food",about:"Hunan food is hotter than Hubei's: fresh and pickled chilies in almost everything.",items:[
+  {k:"cs-stinky",top:1,en:"Changsha stinky tofu",zh:"臭豆腐",py:"chòu dòufu",why:"Black fermented tofu, deep-fried and filled with garlicky chili sauce. It smells strong and tastes much milder.",tip:"<b>¥5-15.</b> Try Huogongdian, or 五娭毑 at Nanmenkou late at night."},
+  {k:"cs-yutou",top:1,en:"Fish head with chopped chili",zh:"剁椒鱼头",py:"duòjiāo yútóu",why:"Hunan's signature dish: a big fish head steamed under red pickled chilies. Mix noodles into the sauce at the end.",tip:""},
+  {k:"cs-lajiao",en:"Pork with green chilies",zh:"辣椒炒肉",py:"làjiāo chǎo ròu",why:"Everyday Hunan home cooking: thin pork stir-fried with blistered green chilies. Order plenty of rice.",tip:""},
+  {k:"cs-tangyou",en:"Sugar-oil cakes",zh:"糖油粑粑",py:"táng yóu bābā",why:"Chewy glutinous rice cakes fried and glazed in caramelised sugar. Eat them hot.",tip:"<b>¥5-10.</b>"},
+  {k:"cs-chayan",en:"Chayan Yuese milk tea",zh:"茶颜悦色",py:"Cháyán Yuèsè",why:"Changsha's own milk tea chain, on almost every corner. The Youlan Latte (幽兰拿铁) is the classic order.",tip:"<b>About ¥17.</b>"}
+ ]},
+ {name:"Try anywhere in China",zh:"必吃",key:"items",kind:"food",about:"Not tied to one city. You will find these in both Changsha and Wuhan.",items:[
+  {k:"cn-hotpot",top:1,en:"Hotpot",zh:"火锅",py:"huǒguō",why:"Cook your own meat and vegetables in a bubbling spicy or mild broth at the table. Haidilao (海底捞) is the easy chain for first-timers.",tip:"Ask for a split pot (鸳鸯锅) to get spicy and mild together."},
+  {k:"cn-malatang",en:"Malatang",zh:"麻辣烫",py:"málà tàng",why:"Pick ingredients from the fridge into a bowl, pay by weight, and they are cooked in a spicy broth for you. A cheap solo lunch.",tip:""},
+  {k:"cn-jianbing",en:"Jianbing",zh:"煎饼果子",py:"jiānbing guǒzi",why:"A crepe cooked on a griddle with egg, a crisp cracker, sauce and scallions, folded up to eat on the go.",tip:"A classic street breakfast."},
+  {k:"cn-xlb",en:"Xiaolongbao",zh:"小笼包",py:"xiǎolóngbāo",why:"Soup dumplings in small steamer baskets, the Shanghai style. Same rule as in Wuhan: bite, sip the broth, then eat.",tip:""},
+  {k:"cn-chuanr",en:"Lamb skewers",zh:"羊肉串",py:"yángròu chuàn",why:"Cumin-and-chili lamb skewers off a charcoal grill. The essential late-night snack with a cold beer.",tip:""}
+ ]}
+];
+
+const ALSO=[
+ {zh:"烧麦",py:"shāomai",en:"Wuhan shaomai",d:"Not the Cantonese kind: filled with <b>glutinous rice, pork and black pepper</b>. Try 顺香居."},
+ {zh:"汤包",py:"tāngbāo",en:"Soup dumplings",d:"Bite a small hole, sip the broth, eat the rest. <b>四季美</b> has made them since 1922."},
+ {zh:"蛋酒",py:"dànjiǔ",en:"Egg wine",d:"Hot sweet fermented rice with an egg stirred through. <b>The standard drink</b> with hot dry noodles."},
+ {zh:"瓦罐鸡汤",py:"wǎguàn jītāng",en:"Clay-pot chicken soup",d:"Slow-simmered chicken soup in a lidded clay jar. <b>小桃园</b> is the old name."},
+ {zh:"鸭脖",py:"yā bó",en:"Spicy braised duck neck",d:"Numbing, sweet-spicy and addictive. Vacuum packs from <b>精武鸭脖</b> or <b>周黑鸭</b> make easy souvenirs."}
+];
+
+const SHOPS=[
+ {zh:"蔡林记",py:"Càilínjì",s:"hot dry noodles"},{zh:"老通城",py:"Lǎotōngchéng",s:"doupi"},
+ {zh:"四季美",py:"Sìjìměi",s:"soup dumplings"},{zh:"小桃园",py:"Xiǎotáoyuán",s:"clay-pot soup"},
+ {zh:"顺香居",py:"Shùnxiāngjū",s:"shaomai"},{zh:"田启恒",py:"Tián Qǐhéng",s:"hutang fen"},
+ {zh:"谢荣德",py:"Xiè Róngdé",s:"mianwo"},{zh:"汪玉霞",py:"Wāng Yùxiá",s:"old-style pastries"}
+];
+
+const CREDITS=[
+ ["Yellow Crane Tower","CN - Hubei - Wuhan - Kranichpagode.jpg","MonsieurRoi","CC BY-SA 3.0"],
+ ["Hubu Alley","Hubu Xiang Entrance.jpg","Howchou","CC BY-SA 3.0"],
+ ["Yangtze River Bridge","Wuhan Yangtze River Bridge-1.jpg","Fllee","CC BY-SA 3.0"],
+ ["Chime bells","20230208 Chime bells of Marquis Yi of Zeng.jpg","Windmemories","CC BY-SA 4.0"],
+ ["Tanhualin","Tanhualin.JPG","Howchou","CC BY 3.0"],
+ ["Wuhan University","Wuhan University Administration Building.jpg","Howchou","CC BY 4.0"],
+ ["East Lake","East Lake Wuhan.JPG","Zheng Zhou","CC BY-SA 4.0"],
+ ["Chu River Han Street","Chuhe Hanjie 4.jpg","Howchou","CC BY-SA 3.0"],
+ ["Jiqing Street","20240622 Jiqing St. in Hankou.jpg","Windmemories","CC BY-SA 4.0"],
+ ["Ferry","Wuhan Ferry 04.jpg","Howchou","CC BY-SA 3.0"],
+ ["Customs House","江汉关正立面侧向2023.4 (cropped).jpg","ScareCriterion12","CC0"],
+ ["Bagong House","20240526-巴公房子-正面.png","Saigyouji-Noriko","CC BY-SA 4.0"],
+ ["Jianghan Road","Hankou-Hanjiang-Lu-0247.jpg","Vmenkov","CC BY-SA 3.0"],
+ ["Guishan","长江桥眺龟山.jpg","Augustokremo","CC BY-SA 4.0"],
+ ["Guqin Terrace","Lute Platform.jpg","kiraclyne","CC BY-SA 4.0"],
+ ["Guiyuan Temple","武汉归元禅寺.JPG","Gisling","CC BY 3.0"],
+ ["Hot dry noodles","Hot Dry Noodles.jpg","ZhengZhou","CC BY-SA 4.0"],
+ ["Doupi","Doupi.jpg","ZhengZhou","CC BY-SA 4.0"],
+ ["Mianwo","Mianwo.JPG","ZhengZhou","CC BY-SA 4.0"],
+ ["Hutang fen","Hutangfen (Rice Noodles in Peppery Carp Soup).jpg","ZhengZhou","CC BY-SA 4.0"],
+ ["Lotus root soup","Lotus Root Soup.jpg","Zheng Zhou","CC BY-SA 4.0"],
+ ["Wuchang bream","Steamed Wuchang Bream.jpg","ZhengZhou","CC BY-SA 4.0"],
+ ["Mianyang three steamed","The three steaming dishes of Mianyang.jpeg","ZhengZhou","CC BY-SA 4.0"],
+ ["Hongshan caitai","Brassica Campestris var. Purpuraria.jpg","Zheng Zhou","CC BY-SA 4.0"],
+ ["Sesame balls","Zin Deoi.jpg","Benjwong","public domain"],
+ ["Orange Isle","Young Mao Zedong statue, 2010110301.jpg","a Commons contributor","CC BY 3.0"],
+ ["Hunan Museum","Entrance of Hunan Museum, 2018-09-28.jpg","Siyuwj","CC BY-SA 4.0"],
+ ["Yuelu Academy","Changsha Yuelu Shuyuan 2014.03.04 08-09-37 (adjusted).jpg","Zhangzhugang","CC BY-SA 4.0"],
+ ["Yuelu Mountain","岳麓山 橘子洲.jpg","維基小霸王","CC BY-SA 4.0"],
+ ["Taiping Street","Taiping Street at night, Changsha.jpg","EditQ","CC BY-SA 4.0"],
+ ["Huogongdian","坡子街火宫殿 - panoramio (1).jpg","gdczjkk","CC BY 3.0"],
+ ["Super Wenheyou","Wenheyou Super Restaurant.jpg","EditQ","CC BY-SA 4.0"],
+ ["Stinky tofu","Changsha-style Stinky Tofu at Huogongdian (20180222183104).jpg","N509FZ","CC BY-SA 4.0"],
+ ["Fish head with chili","Steamed Fish Head with Diced Chili (20150726122046).jpg","N509FZ","CC BY-SA 4.0"],
+ ["Pork with chilies","Sautéed pork with chili pepper at Yinxiang Restaurant (20210522180012).jpg","N509FZ","CC BY-SA 4.0"],
+ ["Sugar-oil cakes","糖油粑粑.jpg","EditQ","CC BY-SA 4.0"],
+ ["Chayan Yuese","Cha Yan Yue Se, Changsha, China, 21 May 2021H.jpg","Huangdan2060","CC BY 3.0"],
+ ["Hotpot","Hot Pot.jpg","Praneeth Thalla","CC BY-SA 4.0"],
+ ["Malatang","Malatang from Hope Tree (20220226172344).jpg","N509FZ","CC BY-SA 4.0"],
+ ["Jianbing","煎饼馃子制作过程5.jpg","Amazingloong","CC BY-SA 4.0"],
+ ["Xiaolongbao","Xiaolongbao Shanghai.jpg","Robigasp","CC BY-SA 4.0"],
+ ["Lamb skewers","Barbecued lamb sticks.jpg","SoHome Jacaranda Lilau","public domain"]
+];
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const zhBtn=(zh,py,en,kind,cls="zh")=>`<button type="button" class="${cls}" lang="zh-CN" data-zh="${esc(zh)}" data-py="${esc(py)}" data-en="${esc(en)}" data-kind="${kind}">${esc(zh)}</button>`;
+const photo=(it,alt)=>`<figure class="ph"><img src="img/${it.k}.jpg" alt="${esc(alt)}" loading="lazy" decoding="async" onerror="this.parentNode.classList.add('noimg')"><span class="fallback" lang="zh-CN" aria-hidden="true">${esc(it.zh)}</span></figure>${it.cap?`<p class="ph-cap">${esc(it.cap)}</p>`:''}`;
+const card=(it,kind)=>`<article class="card${it.lead?' lead':''}" id="p-${it.k}">${photo(it,it.en)}<h4>${esc(it.en)}${it.top?'<span class="pick">Top pick</span>':''}</h4><div class="zhrow">${zhBtn(it.zh,it.py,it.en,kind)}<span class="py">${esc(it.py)}</span></div><p class="why">${esc(it.why)}</p>${it.tip?`<p class="tip">${it.tip}</p>`:''}</article>`;
+const colsFor=n=>n<=1?3:n<=5?n:(n%3===0?3:4);
+const group=(g,kind,key)=>`<div class="bank"><div class="bank-head"><h3>${esc(g.name)}</h3><span class="zhname" lang="zh-CN">${esc(g.zh)}</span>${g.about?`<p>${esc(g.about)}</p>`:''}</div><div class="grid" style="--n:${colsFor(g[key].length)}">${g[key].map(it=>card(it,kind)).join('')}</div></div>`;
+
+document.getElementById('banks').innerHTML=BANKS.map(b=>group(b,'place','places')).join('');
+document.getElementById('meals').innerHTML=MEALS.map(m=>group(m,'food','items')).join('');
+document.getElementById('beyondGroups').innerHTML=BEYOND.map(g=>group(g,g.kind,g.key)).join('');
+document.getElementById('also').innerHTML='<h4>Also worth ordering</h4>'+ALSO.map(a=>`<div class="also-item">${zhBtn(a.zh,a.py,a.en,'food')}<p><span class="py" style="margin:0">${esc(a.py)}</span> &nbsp;${esc(a.en)}. ${a.d}</p></div>`).join('');
+document.getElementById('shops').innerHTML=SHOPS.map(s=>`<div class="shop">${zhBtn(s.zh,s.py,s.s,'place')}<span>${esc(s.s)}</span></div>`).join('');
+document.getElementById('credits').innerHTML='Photos from Wikimedia Commons, used under their licences: '+CREDITS.map(([l,f,a,lic])=>`<a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(f.replace(/ /g,'_'))}" target="_blank" rel="noopener">${esc(l)}</a> by ${esc(a)} (${esc(lic)})`).join('; ')+'. Photos resized from the originals.';
+
+/* show card */
+const sc=document.getElementById('showcard'); let lastFocus=null;
+function openCard(b){
+  lastFocus=b;
+  document.getElementById('scBig').textContent=b.dataset.zh;
+  document.getElementById('scPy').textContent=b.dataset.py||'';
+  document.getElementById('scEn').textContent=b.dataset.en||'';
+  const food=b.dataset.kind==='food';
+  document.getElementById('scAsk').textContent=food?'我想要这个，谢谢':'请带我去这里';
+  document.getElementById('scAskEn').textContent=food?'I would like this, thank you.':'Please take me here.';
+  sc.hidden=false; document.getElementById('scClose').focus();
+}
+function closeCard(){sc.hidden=true; if(lastFocus) lastFocus.focus()}
+document.addEventListener('click',e=>{const b=e.target.closest('.zh'); if(b) openCard(b)});
+document.getElementById('scClose').addEventListener('click',closeCard);
+sc.addEventListener('click',e=>{if(e.target===sc) closeCard()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sc.hidden) closeCard(); if(e.key==='Tab'&&!sc.hidden){e.preventDefault();document.getElementById('scClose').focus()}});
+
+/* map pins jump to the place */
+function jump(key){
+  const el=document.getElementById('p-'+key); if(!el) return;
+  el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+  el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),1600);
+}
+document.querySelectorAll('.pin').forEach(p=>{
+  p.addEventListener('click',()=>jump(p.dataset.key));
+  p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();jump(p.dataset.key)}});
+});
+</script>
+
+</body>
+</html>
